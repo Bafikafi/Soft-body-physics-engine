@@ -2,9 +2,11 @@
 import pygame
 from renderer import *
 import soft_body_parts
+import time
 
 # importing sys module
 import sys
+import consts
 
 vertex = [soft_body_parts.vertex(100, 100), soft_body_parts.vertex(200, 100)]
 edge = soft_body_parts.spring_edge(vertex[0], vertex[1])
@@ -15,12 +17,19 @@ pygame.init()
 # creating display
 display = pygame.display.set_mode((500, 500))
 
+consts.DELTA = 0.01
+next_time = 0
 # creating a running loop
 while True:
     # creating a loop to check events that
     # are occuring
+    display.fill((0, 0, 0))
     renderer.redner_edge_debug(display, edge)
     renderer.render_debug(display, vertex)
+
+    for vert in vertex:
+        vert.next_render()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -31,4 +40,5 @@ while True:
             # if keydown event happened
             # than printing a string to output
             print("A key has been pressed")
+    next_time = time.time()
     pygame.display.update()
