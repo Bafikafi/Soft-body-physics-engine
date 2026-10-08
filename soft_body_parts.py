@@ -1,21 +1,19 @@
 class vertex:
-    x = 0
-    y = 0
+    position = None
     velocity = 0
 
-    def __init__(self, x , y) -> None:
-        self.x = x
-        self.y = y
-
+    def __init__(self, x, y) -> None:
+        self.position = (x, y)
 
 
 class spring_edge:
-    vertex_a = 0
-    vertex_b = 0
+    vertex_a = None
+    vertex_b = None
 
     def __init__(self, vertex_a, vertex_b) -> None:
         self.vertex_a = vertex_a
         self.vertex_b = vertex_b
+
 
 class blob:
     ...
