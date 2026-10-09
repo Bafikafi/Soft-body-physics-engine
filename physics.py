@@ -19,7 +19,7 @@ def apply_spring_forces(edge):
         total_vector.normalize()
         * (total_vector.length() - edge.length)
         * edge.stiffness
-        * 30
+        * consts.SPRING_MULT
     )
     edge.vertex_a.velocity = pygame.Vector2(
         vertex_a.velocity.x
