@@ -16,18 +16,22 @@ class vertex:
 
     def next_render(self):
         physics.apply_gravity_force(self)
-
         self.position += self.velocity * consts.DELTA
 
 
 class spring_edge:
     vertex_a = None
     vertex_b = None
+    length = None
+    stiffness = 1
 
-    def __init__(self, vertex_a, vertex_b) -> None:
+    def __init__(self, vertex_a, vertex_b, length=20, stiffness=1) -> None:
         self.vertex_a = vertex_a
         self.vertex_b = vertex_b
+        self.length = length
+        self.stiffness = 1
+    def next_render(self):
+        physics.apply_spring_forces(self)
 
-
-class blob:
+class blobik:
     ...

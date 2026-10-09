@@ -1,1 +1,2 @@
 DELTA = 0.001
+DAMPER = 0.01
