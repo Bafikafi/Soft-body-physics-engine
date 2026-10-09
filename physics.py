@@ -1,7 +1,7 @@
 import pygame
 import consts
 
-GRAVITY_ACCELERATION = 2
+GRAVITY_ACCELERATION = 800
 
 
 def apply_gravity_force(obj):

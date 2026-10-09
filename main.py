@@ -16,13 +16,14 @@ pygame.init()
 
 # creating display
 display = pygame.display.set_mode((500, 500))
-
+clock = pygame.time.Clock()
 consts.DELTA = 0.01
 next_time = 0
 # creating a running loop
 while True:
     # creating a loop to check events that
     # are occuring
+    consts.DELTA = clock.tick(60) / 1000
     display.fill((0, 0, 0))
     renderer.redner_edge_debug(display, edge)
     renderer.render_debug(display, vertex)
