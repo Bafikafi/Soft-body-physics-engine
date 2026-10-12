@@ -1,7 +1,7 @@
 import pygame
 
 
-class rigid_object:
+class rigid_object_rectangle:
     position = pygame.Vector2(0, 0)
     width = 0
     height = 0
@@ -17,4 +17,3 @@ class rigid_object:
             (0, 0, 0),
             pygame.rect(self.position.x, self.position.y, self.width, self.height),
         )
-    

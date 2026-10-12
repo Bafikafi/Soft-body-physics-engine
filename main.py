@@ -9,7 +9,7 @@ import physics
 import sys
 import consts
 
-vertex = [soft_body_parts.vertex(100, 100), soft_body_parts.vertex(200, 100)]
+vertex = [soft_body_parts.vertex(150, 100), soft_body_parts.vertex(150, 200)]
 edge = soft_body_parts.spring_edge(vertex[0], vertex[1], 50)
 
 # initialising pygame

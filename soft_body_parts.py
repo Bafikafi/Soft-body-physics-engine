@@ -29,9 +29,11 @@ class spring_edge:
         self.vertex_a = vertex_a
         self.vertex_b = vertex_b
         self.length = length
-        self.stiffness = 1
+        self.stiffness = stiffness
+
     def next_render(self):
         physics.apply_spring_forces(self)
+
 
 class blobik:
     ...
