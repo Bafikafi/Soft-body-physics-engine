@@ -1,3 +1,4 @@
+from __future__ import annotations
 import physics
 import consts
 import pygame
@@ -12,9 +13,9 @@ class body(ABC):
     position: pygame.Vector2 = None
     velocity: pygame.Vector2 = None
 
-    def __init__(self, x, y, velocty: pygame.Vector2 = pygame.Vector2(0, 0)) -> None:
+    def __init__(self, x, y, velocity: pygame.Vector2 = pygame.Vector2(0, 0)) -> None:
         self.position = pygame.Vector2(x, y)
-        self.velocity = velocty
+        self.velocity = velocity
 
     @abstractmethod
     def update(self):
@@ -22,9 +23,12 @@ class body(ABC):
 
 
 class vertex(body):
-    def next_render(self):
+    def update(self):
         physics.apply_gravity_force(self)
         self.position += self.velocity * consts.DELTA
+
+    def add_point_collider(self, collider: collision_detection.point_collider):
+        self.collider = collider
 
 
 class spring_edge:
@@ -39,19 +43,22 @@ class spring_edge:
         self.length = length
         self.stiffness = stiffness
 
-    def next_render(self):
+    def update(self):
         physics.apply_spring_forces(self)
 
 
 class soft_body:
-    springs: list(spring_edge) = []
-    vertecies: list(vertex) = []
+    springs: list[spring_edge] = []
+    vertecies: list[vertex] = []
 
     def add_vertex(self, vertex: vertex):
         self.vertecies.append(vertex)
 
     def add_spring(self, spring: spring_edge):
         self.springs.append(spring)
+
+    def add_soft_body_collider(self, collider: collision_detection.soft_body_collider):
+        self.collider = collider
 
     def update(self):
         for vertex in self.vertecies:
@@ -71,8 +78,16 @@ class rigid_object_rectangle(body):
     height = 0
 
     def __init__(
-        self, x, y, velocity: pygame.Vector2, width: float, height: float
+        self,
+        x,
+        y,
+        width: float,
+        height: float,
+        velocity: pygame.Vector2 = pygame.Vector2(0, 0),
     ) -> None:
         super().__init__(x, y, velocity)
         self.width = width
         self.height = height
+
+    def add_rect_collider(self, collider: collision_detection.rect_collider):
+        self.collider = collider

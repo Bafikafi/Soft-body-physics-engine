@@ -1,7 +1,7 @@
 # importing pygame module
 import pygame
 from renderer import *
-import soft_body_parts
+import body
 import time
 import physics
 
@@ -9,8 +9,8 @@ import physics
 import sys
 import consts
 
-vertex = [soft_body_parts.vertex(150, 100), soft_body_parts.vertex(150, 200)]
-edge = soft_body_parts.spring_edge(vertex[0], vertex[1], 50)
+vertex = [body.vertex(150, 100), body.vertex(150, 200)]
+edge = body.spring_edge(vertex[0], vertex[1], 50)
 
 # initialising pygame
 pygame.init()
@@ -32,7 +32,7 @@ while True:
     # for vert in vertex:
     #   vert.next_render()
 
-    vertex[0].next_render()
+    vertex[0].update()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
