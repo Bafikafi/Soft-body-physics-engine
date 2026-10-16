@@ -13,9 +13,9 @@ class body(ABC):
     position: pygame.Vector2 = None
     velocity: pygame.Vector2 = None
 
-    def __init__(self, x, y, velocity: pygame.Vector2 = pygame.Vector2(0, 0)) -> None:
+    def __init__(self, x, y, velocity: pygame.Vector2 | None = None) -> None:
         self.position = pygame.Vector2(x, y)
-        self.velocity = velocity
+        self.velocity = pygame.Vector2(0, 0) if velocity is None else velocity.copy()
 
     @abstractmethod
     def update(self):
@@ -32,11 +32,6 @@ class vertex(body):
 
 
 class spring_edge:
-    vertex_a = None
-    vertex_b = None
-    length = None
-    stiffness = 1
-
     def __init__(self, vertex_a, vertex_b, length=20, stiffness=1) -> None:
         self.vertex_a = vertex_a
         self.vertex_b = vertex_b
@@ -46,10 +41,13 @@ class spring_edge:
     def update(self):
         physics.apply_spring_forces(self)
 
+
 # TODO - Refactor: why no softbody collider in softbody class?
 class soft_body:
-    springs: list[spring_edge] = []
-    vertecies: list[vertex] = []
+    def __init__(self) -> None:
+        self.vertecies = list()
+        self.springs = list()
+        self.collider = None
 
     def add_vertex(self, vertex: vertex):
         self.vertecies.append(vertex)
