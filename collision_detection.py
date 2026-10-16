@@ -14,6 +14,7 @@ class collision_detector:
 
     """
     TODO Refactor - not calling response based on if soft-body or not
+     (use response of sof)
     """
 
     def update(self):

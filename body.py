@@ -46,7 +46,7 @@ class spring_edge:
     def update(self):
         physics.apply_spring_forces(self)
 
-
+# TODO - Refactor: why no softbody collider in softbody class?
 class soft_body:
     springs: list[spring_edge] = []
     vertecies: list[vertex] = []
@@ -63,6 +63,8 @@ class soft_body:
     def update(self):
         for vertex in self.vertecies:
             vertex.update()
+        for spring in self.springs:
+            spring.update()
 
 
 class blobik(soft_body):
@@ -91,3 +93,6 @@ class rigid_object_rectangle(body):
 
     def add_rect_collider(self, collider: collision_detection.rect_collider):
         self.collider = collider
+
+    def update(self):
+        return super().update()

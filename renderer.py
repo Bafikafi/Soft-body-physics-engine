@@ -25,10 +25,10 @@ class renderer:
     def render_rigid_object(display: pygame.display, rigid_body):
         pygame.draw.rect(
             display,
-            (0, 0, 0),
-            pygame.rect(
-                rigid_body.position.x,
-                rigid_body.position.y,
+            (255, 255, 255),
+            pygame.rect.Rect(
+                rigid_body.position.x - rigid_body.width / 2,
+                rigid_body.position.y - rigid_body.height / 2,
                 rigid_body.width,
                 rigid_body.height,
             ),
