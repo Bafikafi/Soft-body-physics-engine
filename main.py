@@ -8,7 +8,7 @@ import softbody_factory
 
 
 collision_detector = collision_detection.collision_detector()
-test_body = softbody_factory.build("test_bodies.json", collision_detector)
+test_body = softbody_factory.build("assets/double_ring.json", collision_detector)
 
 
 test_body.vertecies[1].position.x += 15
@@ -18,10 +18,9 @@ pygame.init()
 
 display = pygame.display.set_mode((500, 500))
 clock = pygame.time.Clock()
-physics_steps = 4
+physics_steps = 8
 
 while True:
-
     consts.DELTA = clock.tick(60) / (1000 * physics_steps)
     for _ in range(physics_steps):
         test_body.update()
