@@ -59,17 +59,34 @@ def test_create_springs(softbody_data):
 
 
 def test_add_colliders(softbody_data):
-    vertices = builder._create_vertecies(softbody_data["vertecies"])
+    vertices = builder._create_vertecies(
+        softbody_data["vertecies"]
+    )
+
+    softbody = builder._create_softbody(
+        vertices.values(), []
+    )
 
     detector = Mock()
 
     builder._add_colliders(
+        softbody,
         vertices.values(),
         detector,
     )
 
     for vertex in vertices.values():
         assert vertex.collider is not None
+
+    detector.add_collider.assert_called_once()
+
+    registered_collider = detector.add_collider.call_args.args[0]
+
+    assert isinstance(
+        registered_collider,
+        builder.collision_detection.soft_body_collider
+    )
+    assert registered_collider.body is softbody
 
 
 def test_build(json_file):
