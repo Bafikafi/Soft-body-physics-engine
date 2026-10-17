@@ -3,6 +3,7 @@ from math import copysign
 import pygame
 from abc import ABC, abstractmethod
 import body as Body
+import physics
 
 
 class collision_detector:
@@ -113,6 +114,7 @@ class point_collider(collider):
             self.body.velocity
             - min(0, pygame.Vector2.dot(self.body.velocity, norm)) * norm
         )
+        physics.apply_friction(self.body, -norm)
 
 
 """
