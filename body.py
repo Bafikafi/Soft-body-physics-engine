@@ -23,6 +23,11 @@ class body(ABC):
 
 
 class vertex(body):
+
+    def __init__(self, x, y, velocity: pygame.Vector2 | None = None) -> None:
+        super().__init__(x, y, velocity)
+        self.springs = list()
+
     def update(self):
         physics.apply_gravity_force(self)
         self.position += self.velocity * consts.DELTA

@@ -38,6 +38,8 @@ def _create_springs(
         vertex_b = vertecies_ids[spring_id["to"]]
         length = (vertex_b.position - vertex_a.position).length()
         spring = Body.spring_edge(vertex_a, vertex_b, length, stiffness)
+        vertex_a.springs.append(spring)
+        vertex_b.springs.append(spring)
         springs.append(spring)
     return springs
 
