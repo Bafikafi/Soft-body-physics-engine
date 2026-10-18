@@ -1,10 +1,8 @@
-
 import pytest
 import pygame
 
 import physics
 import consts
-
 
 
 @pytest.fixture

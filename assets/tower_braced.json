@@ -1,6 +1,6 @@
 {
   "name": "tower_braced",
-  "stiffness": 1800,
+  "stiffness":2000,
   "vertecies": [
     {
       "id": 0,

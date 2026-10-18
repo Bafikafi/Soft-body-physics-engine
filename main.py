@@ -12,11 +12,11 @@ test_body = softbody_factory.build("assets/double_ring.json", collision_detector
 
 
 test_body.vertecies[1].position.x += 15
-ground = body.rigid_object_rectangle(250, 450, 900, 100)
+ground = body.rigid_object_rectangle(250, 750, 1500, 100)
 ground.add_rect_collider(collision_detection.rect_collider(ground, collision_detector))
 pygame.init()
 
-display = pygame.display.set_mode((500, 500))
+display = pygame.display.set_mode((800, 800))
 clock = pygame.time.Clock()
 physics_steps = 8
 

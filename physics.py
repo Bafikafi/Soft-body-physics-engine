@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from body import spring_edge, vertex
-    from collision_detection import point_collider
 
 
 GRAVITY_ACCELERATION = 700
@@ -71,3 +70,8 @@ def apply_friction(vertex: vertex, normal: pygame.Vector2):
         max(0, abs(vel.y) - abs(rotated_normal.y) * friction_force * consts.DELTA),
         vel.y,
     )
+
+
+def apply_drag(vertex: vertex):
+    drag_force = -consts.DRAG_COEFFICIENT * vertex.velocity
+    vertex.velocity += drag_force * consts.DELTA
