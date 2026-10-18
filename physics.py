@@ -46,10 +46,17 @@ def calculate_spring_force(edge: spring_edge):
     b_vector: pygame.Vector2 = vertex_b.position
 
     spring_vector = b_vector - a_vector
-    spring_force_vector = (
+    relative_velocity = vertex_b.velocity - vertex_a.velocity
+
+    normal_force_vector = (
         spring_vector.normalize()
-        * (spring_vector.length() - edge.length)
-        * edge.stiffness
+        if spring_vector != pygame.Vector2(0, 0)
+        else relative_velocity.normalize()
+        if relative_velocity != pygame.Vector2(0, 0)
+        else pygame.Vector2(0, 0)
+    )
+    spring_force_vector = (
+        normal_force_vector * (spring_vector.length() - edge.length) * edge.stiffness
     )
     return spring_force_vector
 
