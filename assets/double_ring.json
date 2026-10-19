@@ -1,6 +1,6 @@
 {
   "name": "double_ring",
-  "stiffness": 1300,
+  "stiffness": 2500,
   "vertecies": [
     {
       "id": 0,

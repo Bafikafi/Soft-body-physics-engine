@@ -10,9 +10,6 @@ if TYPE_CHECKING:
 
 
 class body(ABC):
-    position: pygame.Vector2 = None
-    velocity: pygame.Vector2 = None
-
     def __init__(self, x, y, velocity: pygame.Vector2 | None = None) -> None:
         self.position = pygame.Vector2(x, y)
         self.velocity = pygame.Vector2(0, 0) if velocity is None else velocity.copy()
@@ -34,6 +31,18 @@ class vertex(body):
 
     def add_point_collider(self, collider: collision_detection.point_collider):
         self.collider = collider
+
+
+class hold_vertex(vertex):
+    def __init__(self, x, y, velocity: pygame.Vector2 | None = None) -> None:
+        super().__init__(x, y, velocity)
+        self.target_pos = pygame.Vector2(0, 0)  #
+
+    def set_target_posisiton(self, target: pygame.Vector2):
+        self.target_pos = target
+
+    def update(self):
+        self.position = self.target_pos
 
 
 class spring_edge:
@@ -68,6 +77,16 @@ class soft_body:
             vertex.update()
         for spring in self.springs:
             spring.update()
+
+    def get_closest_point(self, pos: pygame.Vector2) -> vertex:
+        closest_pos = pygame.Vector2(float("inf"), float("inf"))
+        closest_vertex = None
+        for vertex in self.vertecies:
+            if not (pos.distance_to(vertex.position) < pos.distance_to(closest_pos)):
+                continue
+            closest_pos = vertex.position
+            closest_vertex = vertex
+        return closest_vertex
 
 
 class blobik(soft_body):

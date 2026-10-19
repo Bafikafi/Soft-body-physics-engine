@@ -1,0 +1,2 @@
+            interaction.release()
+            interaction = None
