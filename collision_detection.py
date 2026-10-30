@@ -81,6 +81,7 @@ class rect_collider(collider):
 
 
 class point_collider(collider):
+    
     def detect(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
         if isinstance(other, point_collider):
             raise NotImplementedError(
@@ -94,6 +95,24 @@ class point_collider(collider):
     TODO Refactor - have collision predicted, respond based off prediction
     Should create smoother collisions 
     """
+    def _response_rect_collider(self, other:"collider"):
+        rect_body = other.body
+        diff = self.body.position - rect_body.position
+        dl = rect_body.height / 2 - abs(diff.y)
+        dw = rect_body.width / 2 - abs(diff.x)
+        penetration = pygame.Vector2(0, 0)
+        if dl < dw:
+            norm = pygame.Vector2(0, copysign(1, diff.y))
+            penetration.y = copysign(dl, diff.y)
+        else:
+            norm = pygame.Vector2(copysign(1, diff.x), 0)
+            penetration.x = copysign(dw, diff.x)
+#            self.body.velocity = (
+  #          self.body.velocity
+ #           - min(0, pygame.Vector2.dot(self.body.velocity, norm)) * norm
+#        ) 
+        return contact(collision=other, normal=norm, penetration=0)
+
 
     def response(self, other: "collider") -> None:
         # !Rectangle class have no rotation
@@ -101,26 +120,7 @@ class point_collider(collider):
             raise NotImplementedError(
                 "Feature not implemented - can't collide with points"
             )
-        rect_body = other.body
-        diff = self.body.position - rect_body.position
-        dl = rect_body.height / 2 - abs(diff.y)
-        dw = rect_body.width / 2 - abs(diff.x)
-        penetration = pygame.Vector2(0, 0)
-        if dl < dw:
-            self.body.position.y += copysign(dl, diff.y)
-            norm = pygame.Vector2(0, copysign(1, diff.y))
-            penetration.y = copysign(dl, diff.y)
-        else:
-            self.body.position.x += copysign(dw, diff.x)
-            norm = pygame.Vector2(copysign(1, diff.x), 0)
-            penetration.x = copysign(dw, diff.x)
-        self.body.velocity = (
-            self.body.velocity
-            - min(0, pygame.Vector2.dot(self.body.velocity, norm)) * norm
-        )
-        self.body.context.contacts.append(contact(other, norm, 0))
-        physics.apply_friction(self.body, -norm)
-        self.body.context.contacts.append(contact(collision=other, normal=norm, penetration=0))
+        self.body.context.contacts.append(self._response_rect_collider(other))
 
 
 """
