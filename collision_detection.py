@@ -5,6 +5,16 @@ from abc import ABC, abstractmethod
 import body as Body
 import physics
 from context import contact
+from dataclasses import dataclass, replace
+
+
+@dataclass
+class detection_response:
+    detected: bool
+    source: "collider"
+    components: None | list["collider"]
+    target: "collider"
+
 
 class collision_detector:
     def __init__(self, colliders: list("collider") | None = None) -> None:
@@ -24,18 +34,12 @@ class collision_detector:
                 if i == j:
                     continue
 
-                if isinstance(self.colliders[j], soft_body_collider):
-                    result = self.colliders[j].detect(self.colliders[i])
-                    other = self.colliders[i]
-                else:
-                    result = self.colliders[i].detect(self.colliders[j])
-                    other = self.colliders[j]
-                if not result[0]:
+                result = self.colliders[i].detect(self.colliders[j])
+                if not result.detected:
                     continue
-                for col in result[1]:
-                    col.response(result[2])
-                result[2].response(other)
-
+                reversed_result = replace(result, source=result.target, target = result.source)
+                self.colliders[i].response(result)
+                self.colliders[j].response(reversed_result)
 
 
 class collider(ABC):
@@ -47,55 +51,81 @@ class collider(ABC):
             collision_detector.add_collider(self)
 
     # TODO Refactor - wtf tuple, use dataclass
+    # *Done ^‿^
     @abstractmethod
-    def detect(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
+    def detect(self, other: "collider") -> detection_response:
         pass
 
     @abstractmethod
-    def response(self, other: "collider") -> None:
+    def response(self, result: detection_response) -> None:
         pass
 
 
 class rect_collider(collider):
-    def detect(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
+    def _detect_point(self, other: "collider") -> bool:
+        is_in_horizontal = (
+            self.body.position.x + self.body.width / 2
+            >= other.body.position.x
+            >= self.body.position.x - self.body.width / 2
+        )
+        is_in_vertical = (
+            self.body.position.y + self.body.height / 2
+            >= other.body.position.y
+            >= self.body.position.y - self.body.height / 2
+        )
+        return is_in_horizontal and is_in_vertical
+
+    def _detect_soft_body(
+        self, other: "collider"
+    ) -> detection_response:
+        return other.detect(self)
+
+    def detect(self, other: "collider") -> detection_response:
+        detected = False
+        components = None
+
         if isinstance(other, rect_collider):
-            if not isinstance(other.body, Body.rigid_object_rectangle):
-                raise NotImplementedError("Feature is not implemented")
-                # !fix later, not needed for product
-        if isinstance(other, point_collider):
-            is_in_horizontal = (
-                self.body.position.x + self.body.width / 2
-                >= other.body.position.x
-                >= self.body.position.x - self.body.width / 2
-            )
-            is_in_vertical = (
-                self.body.position.y + self.body.height / 2
-                >= other.body.position.y
-                >= self.body.position.y - self.body.height / 2
-            )
+            raise NotImplementedError("Rect collision not implemented")
 
-            return (is_in_horizontal and is_in_vertical, [self], other)
+        elif isinstance(other, point_collider):
+            detected = self._detect_point(other)
 
-    def response(self, other: "collider") -> None:
-        return super().response(other)  # *No functionality needed for prototype
+        elif isinstance(other, soft_body_collider):
+            res = self._detect_soft_body(other)
+            detected = res.detected
+            components = res.components
+
+        else:
+            raise NotImplementedError("Collider type not supported")
+
+        return detection_response(
+            detected=detected,
+            source=self,
+            target=other,
+            components=components
+        )
+
+    def response(self, result: detection_response) -> None:
+        return super().response(result)  # *No functionality needed for prototype
 
 
 class point_collider(collider):
-    
-    def detect(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
+    def detect(self, other: "collider") -> detection_response:
         if isinstance(other, point_collider):
             raise NotImplementedError(
                 "Feature is not implemented"
             )  # TODO can be done in later stages
         if isinstance(other, rect_collider):
             res = other.detect(self)
-            return (res[0], res[1], [self])
+            res.source, res.target = res.target, res.source
+            return res
 
     """
     TODO Refactor - have collision predicted, respond based off prediction
     Should create smoother collisions 
     """
-    def _response_rect_collider(self, other:"collider"):
+
+    def _response_rect_collider(self, other: "collider"):
         rect_body = other.body
         diff = self.body.position - rect_body.position
         dl = rect_body.height / 2 - abs(diff.y)
@@ -107,20 +137,19 @@ class point_collider(collider):
         else:
             norm = pygame.Vector2(copysign(1, diff.x), 0)
             penetration.x = copysign(dw, diff.x)
-#            self.body.velocity = (
-  #          self.body.velocity
- #           - min(0, pygame.Vector2.dot(self.body.velocity, norm)) * norm
-#        ) 
+        #            self.body.velocity = (
+        #          self.body.velocity
+        #           - min(0, pygame.Vector2.dot(self.body.velocity, norm)) * norm
+        #        )
         return contact(collision=other, normal=norm, penetration=0)
 
-
-    def response(self, other: "collider") -> None:
+    def response(self, result: detection_response) -> None:
         # !Rectangle class have no rotation
-        if not isinstance(other.body, Body.rigid_object_rectangle):
+        if not isinstance(result.target.body, Body.rigid_object_rectangle):
             raise NotImplementedError(
                 "Feature not implemented - can't collide with points"
             )
-        self.body.context.contacts.append(self._response_rect_collider(other))
+        self.body.context.contacts.append(self._response_rect_collider(result.target))
 
 
 """
@@ -143,21 +172,25 @@ class soft_body_collider(collider):
                 v.collider = point_collider(v)
             self.body_colliders.append(v.collider)
 
-    def detect(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
-        result = (False, list())
+    def detect(self, other: "collider") -> detection_response:
+        result = detection_response(
+            detected=False, source=self, components=list(), target=other
+        )
         if isinstance(other, rect_collider):
             for coll in self.body_colliders:
-                if not other.detect(coll)[0]:
+                if not other.detect(coll).detected:
                     continue
-                result[1].append(coll)
-                if not result[0]:
-                    result = (True, result[1], other)
+                result.components.append(coll)
+                if not result.detected:
+                    result.detected = True
         if isinstance(other, point_collider):
-            pass  # TODO Later stages
+            raise NotImplementedError("Feature not implemented")
         if isinstance(other, soft_body_collider):
-            pass  # TODO Later stages
+            raise NotImplementedError("Feature not implemented")
         return result
 
-    def response(self, other: "collider") -> None:
-        pass  # *No funcitionality, composite class - Refactor will fix
-    
+    def response(self, result: detection_response) -> None:
+        if not result.components:
+            return
+        for coll in result.components:
+            coll.response(result)
