@@ -23,11 +23,6 @@ class collision_detector:
     def add_collider(self, collider: "collider"):
         self.colliders.append(collider)
 
-    """
-    TODO Refactor - not calling response based on if soft-body or not
-     (use response of sof)
-    """
-
     def update(self):
         for i in range(len(self.colliders)):
             for j in range(i, len(self.colliders)):
@@ -37,7 +32,9 @@ class collision_detector:
                 result = self.colliders[i].detect(self.colliders[j])
                 if not result.detected:
                     continue
-                reversed_result = replace(result, source=result.target, target = result.source)
+                reversed_result = replace(
+                    result, source=result.target, target=result.source
+                )
                 self.colliders[i].response(result)
                 self.colliders[j].response(reversed_result)
 
@@ -75,9 +72,7 @@ class rect_collider(collider):
         )
         return is_in_horizontal and is_in_vertical
 
-    def _detect_soft_body(
-        self, other: "collider"
-    ) -> detection_response:
+    def _detect_soft_body(self, other: "collider") -> detection_response:
         return other.detect(self)
 
     def detect(self, other: "collider") -> detection_response:
@@ -99,10 +94,7 @@ class rect_collider(collider):
             raise NotImplementedError("Collider type not supported")
 
         return detection_response(
-            detected=detected,
-            source=self,
-            target=other,
-            components=components
+            detected=detected, source=self, target=other, components=components
         )
 
     def response(self, result: detection_response) -> None:
@@ -150,12 +142,6 @@ class point_collider(collider):
                 "Feature not implemented - can't collide with points"
             )
         self.body.context.contacts.append(self._response_rect_collider(result.target))
-
-
-"""
-TODO Refactor - keep the collided point_colliders and save them inside class. 
-When response is called - call response of all collided point_colliders
-"""
 
 
 class soft_body_collider(collider):
