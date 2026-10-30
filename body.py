@@ -2,6 +2,7 @@ from __future__ import annotations
 import physics
 import consts
 import pygame
+from context import physics_context
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
@@ -13,6 +14,7 @@ class body(ABC):
     def __init__(self, x, y, velocity: pygame.Vector2 | None = None) -> None:
         self.position = pygame.Vector2(x, y)
         self.velocity = pygame.Vector2(0, 0) if velocity is None else velocity.copy()
+        self.context = physics_context([])
 
     @abstractmethod
     def update(self):
@@ -99,8 +101,6 @@ class long_boi(soft_body):
 
 
 class rigid_object_rectangle(body):
-    width = 0
-    height = 0
 
     def __init__(
         self,
@@ -119,3 +119,7 @@ class rigid_object_rectangle(body):
 
     def update(self):
         return super().update()
+
+
+
+

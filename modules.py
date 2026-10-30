@@ -75,7 +75,7 @@ class accumulator:
             force.update(0, 0)
 
     def get_forces(self) -> dict[Body.vertex, Vector2]:
-        return self.forces
+        return self.forces.clone()
 
 
 class integrator:

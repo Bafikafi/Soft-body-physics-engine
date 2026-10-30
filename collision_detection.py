@@ -4,7 +4,7 @@ import pygame
 from abc import ABC, abstractmethod
 import body as Body
 import physics
-
+from context import contact
 
 class collision_detector:
     def __init__(self, colliders: list("collider") | None = None) -> None:
@@ -25,16 +25,17 @@ class collision_detector:
                     continue
 
                 if isinstance(self.colliders[j], soft_body_collider):
-                    result = self.colliders[j].collided(self.colliders[i])
+                    result = self.colliders[j].detect(self.colliders[i])
                     other = self.colliders[i]
                 else:
-                    result = self.colliders[i].collided(self.colliders[j])
+                    result = self.colliders[i].detect(self.colliders[j])
                     other = self.colliders[j]
                 if not result[0]:
                     continue
                 for col in result[1]:
                     col.response(result[2])
                 result[2].response(other)
+
 
 
 class collider(ABC):
@@ -47,7 +48,7 @@ class collider(ABC):
 
     # TODO Refactor - wtf tuple, use dataclass
     @abstractmethod
-    def collided(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
+    def detect(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
         pass
 
     @abstractmethod
@@ -56,7 +57,7 @@ class collider(ABC):
 
 
 class rect_collider(collider):
-    def collided(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
+    def detect(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
         if isinstance(other, rect_collider):
             if not isinstance(other.body, Body.rigid_object_rectangle):
                 raise NotImplementedError("Feature is not implemented")
@@ -80,13 +81,13 @@ class rect_collider(collider):
 
 
 class point_collider(collider):
-    def collided(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
+    def detect(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
         if isinstance(other, point_collider):
             raise NotImplementedError(
                 "Feature is not implemented"
             )  # TODO can be done in later stages
         if isinstance(other, rect_collider):
-            res = other.collided(self)
+            res = other.detect(self)
             return (res[0], res[1], [self])
 
     """
@@ -104,17 +105,22 @@ class point_collider(collider):
         diff = self.body.position - rect_body.position
         dl = rect_body.height / 2 - abs(diff.y)
         dw = rect_body.width / 2 - abs(diff.x)
+        penetration = pygame.Vector2(0, 0)
         if dl < dw:
             self.body.position.y += copysign(dl, diff.y)
             norm = pygame.Vector2(0, copysign(1, diff.y))
+            penetration.y = copysign(dl, diff.y)
         else:
             self.body.position.x += copysign(dw, diff.x)
             norm = pygame.Vector2(copysign(1, diff.x), 0)
+            penetration.x = copysign(dw, diff.x)
         self.body.velocity = (
             self.body.velocity
             - min(0, pygame.Vector2.dot(self.body.velocity, norm)) * norm
         )
+        self.body.context.contacts.append(contact(other, norm, 0))
         physics.apply_friction(self.body, -norm)
+        self.body.context.contacts.append(contact(collision=other, normal=norm, penetration=0))
 
 
 """
@@ -137,11 +143,11 @@ class soft_body_collider(collider):
                 v.collider = point_collider(v)
             self.body_colliders.append(v.collider)
 
-    def collided(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
+    def detect(self, other: "collider") -> tuple[bool, list["collider"], "collider"]:
         result = (False, list())
         if isinstance(other, rect_collider):
             for coll in self.body_colliders:
-                if not other.collided(coll)[0]:
+                if not other.detect(coll)[0]:
                     continue
                 result[1].append(coll)
                 if not result[0]:
@@ -154,3 +160,4 @@ class soft_body_collider(collider):
 
     def response(self, other: "collider") -> None:
         pass  # *No funcitionality, composite class - Refactor will fix
+    

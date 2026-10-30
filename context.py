@@ -1,5 +1,5 @@
 from __future__ import annotations
-from attr import dataclass
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -11,10 +11,9 @@ if TYPE_CHECKING:
 
 @dataclass
 class contact:
-    body: Body.body
     collision: collision_detection.collider
     normal: Vector2
-    penetration: float
+    penetration: Vector2
 
 @dataclass
 class physics_context:
