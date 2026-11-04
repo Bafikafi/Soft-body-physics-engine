@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from pygame import Vector2
 import consts
 from physics import calculate_spring_force
+import pygame
 
 if TYPE_CHECKING:
     import body as Body
@@ -114,3 +115,10 @@ class linear_drag_force_module(force_module):
 class friction_force_module(force_module):
     def apply_forces(self, accumulator: accumulator, context: physics_context) -> None:
         pass
+
+class collision_constraint(constraint_module):
+    def solve(self, context: physics_context):
+        for contact in context.contacts:
+            norm = contact.normal
+            contact.body.position += contact.penetration
+            contact.body.velocity -= min(0, pygame.Vector2.dot(self.body.velocity, norm)) * norm

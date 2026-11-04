@@ -133,7 +133,7 @@ class point_collider(collider):
         #          self.body.velocity
         #           - min(0, pygame.Vector2.dot(self.body.velocity, norm)) * norm
         #        )
-        return contact(collision=other, normal=norm, penetration=0)
+        return contact(collision=other, normal=norm, penetration=penetration, body=self.body)
 
     def response(self, result: detection_response) -> None:
         # !Rectangle class have no rotation

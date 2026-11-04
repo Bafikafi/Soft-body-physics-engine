@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class contact:
+    body: Body.body
     collision: collision_detection.collider
     normal: Vector2
     penetration: Vector2
